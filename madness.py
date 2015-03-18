@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 16 19:06:23 2015
-
-@author: JLALOR
-"""
 
 import sqlite3
 import os
