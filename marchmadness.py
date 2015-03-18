@@ -1,11 +1,13 @@
-#Quick and dirty predictor for NCAA Tournament
+#Quick little predictor for NCAA Tournament
+#Based on SRS values from http://www.sports-reference.com/cbb/seasons/2015-school-stats.html
 #John Lalor
 
 import os
 import random
 
 def setup():
-	os.chdir('C:\Users\jlalor\Documents\marchmadness')
+	#Set your own directory with the below line
+	#os.chdir('C:\')
 
 	infile = open('schoolstats.csv')
 	working_stats = infile.readlines()
@@ -24,7 +26,7 @@ def setup():
         
 	for line  in stats:
 		team_name = line[1]
-		srs_score = line[6]
+		srs_score = line[6] #can use a different value if you want, I'm using SRS
 		team_stats[team_name] = float(srs_score)
 
 	teams = {
@@ -43,7 +45,7 @@ def setup():
 		13:'Valparaiso',
 		14:'Northeastern',
 		15:'New Mexico State',
-		16:'Manhattan',
+		16:'Hampton',
 		17:'Wisconsin',
 		18:'Arizona',
 		19:'Baylor',
@@ -154,12 +156,15 @@ def makePick2(team1, team2):
     t1_underdog = team1 % 16 if team1 < 16 else 16
     t2_underdog = team2 % 16 if team2 < 16 else 16
     
-    for k in range(int(t1_underdog)): #  * round(random.randrange(5 * t1_underdog,10*t1_underdog)))):
+    #uncomment the below portions for a little more chaos in the predictions
+    for k in range(int(t1_underdog)):#  * round(random.randrange(1 * t1_underdog,2*t1_underdog)))):
         names.append(team1)
 
-    for m in range(int(t2_underdog)):#   * round(random.randrange(5*t2_underdog,10*t2_underdog)))):
+    for m in range(int(t2_underdog)):#   * round(random.randrange(1*t2_underdog,2*t2_underdog)))):
         names.append(team2)
-	return random.choice(names)
+
+
+    return random.choice(names)
 
 def simulateGame(seed1, seed2):
 	results = {seed1:0,seed2:0}
@@ -182,7 +187,7 @@ def simulateRound(roundList, nextRoundList):
 	return nextRoundList
 
 
-def runSim(rounds, teams, team_stats):
+def runSim(rounds, teams, team_stats, verbose):
 	for i in range(0,len(rounds)-1):
 		r = rounds[i]
 		nextR = rounds[i+1]
@@ -193,24 +198,34 @@ def runSim(rounds, teams, team_stats):
 			team1 = teams[round[game][0]]
 			seed1 = round[game][0] % 16 if round[game][0] % 16 > 0 else 16
 			team2 = teams[round[game][1]]
-			seed2 = round[game][1] % 16 if round[game][0] % 16 > 0 else 16
-			
-			print str(game) + ': ' + team1 + ' (' + str(seed1) + ')' + ' vs. ' + team2 + ' (' + str(seed2) + ')'
+			seed2 = round[game][1] % 16 if round[game][1] % 16 > 0 else 16
+			if verbose:
+				print str(game) + ': ' + team1 + ' (' + str(seed1) + ')' + ' vs. ' + team2 + ' (' + str(seed2) + ')'
 			nextGame = round[game][2]
 			nextPos = 1 if game % 2 == 0 else 0 
 			winningTeam = teams[rounds[i+1][round[game][2]][nextPos]]
 			winningSeed = rounds[i+1][round[game][2]][nextPos] % 16 if rounds[i+1][round[game][2]][nextPos] % 16 > 0 else 16
-			print 'Winner: ' + winningTeam + ' (' + str(winningSeed) + ')'
-			print 
-	print 'NCAA Winner: ' + teams[rounds[6][64][0]]
+			if verbose:
+				print 'Winner: ' + winningTeam + ' (' + str(winningSeed) + ')'
+				print 
+	if verbose:
+		print 'NCAA Winner: ' + teams[rounds[6][64][0]]
 	return teams[rounds[6][64][0]]
 
+
 d = {}
-#for z in range(100):
-teams, rounds, team_stats = setup()
-winner = runSim(rounds, teams, team_stats)
-	#if winner in d:
-	#	d[winner] += 1
-	#else:
-	#	d[winner] = 1
+
+#If you want a random champion, run as is
+#If you want a particular champion, replace Villanova with your favorite team
+#and swap out the while loop statements
+
+#while 'Villanova' not in d:
+while len(d.keys()) < 1:
+	teams, rounds, team_stats = setup()
+	winner = runSim(rounds, teams, team_stats, True)
+	if winner in d:
+		d[winner] += 1
+	else:
+		d[winner] = 1
+#This line will print the winner counts after n runs
 #print d
